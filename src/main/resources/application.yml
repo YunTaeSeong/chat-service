@@ -6,6 +6,14 @@ spring:
     username: ${spring.datasource.username}
     password: ${spring.datasource.password}
     driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    open-in-view: false
+    properties:
+      hibernate:
+        enable_lazy_load_no_trans: true
   security:
     oauth2:
       client:
@@ -15,6 +23,12 @@ spring:
             client-secret: ${KAKAO_CLIENT_SECRET}
             scope:
               - profile_nickname
+              - account_email
+              - name
+              - gender
+              - birthday
+              - birthyear
+              - phone_number
             redirect-uri: "http://localhost:8080/login/oauth2/code/kakao"
             client-name: kakao
             authorization-grant-type: authorization_code
