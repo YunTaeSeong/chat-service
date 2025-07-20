@@ -1,10 +1,18 @@
 package chat.develop.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 // 어떠한 사용자가 어떤 채팅방에 참여 했는지?
 @Entity
 @Table(name = "member_chatroom_mapping")
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class MemberChatroomMapping {
 
     @Id
