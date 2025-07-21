@@ -3,8 +3,10 @@ package chat.develop.service;
 import chat.develop.entity.Chatroom;
 import chat.develop.entity.Member;
 import chat.develop.entity.MemberChatroomMapping;
+import chat.develop.entity.Message;
 import chat.develop.repository.ChatroomRepository;
 import chat.develop.repository.MemberChatroomMappingRepository;
+import chat.develop.repository.MessageRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,6 +22,7 @@ public class ChatService {
 
     private final ChatroomRepository chatroomRepository;
     private final MemberChatroomMappingRepository memberChatroomMappingRepository;
+    private final MessageRepository messageRepository;
 
     // 채팅방 생성
     public Chatroom createChatroom(Member member, String title) {
@@ -78,5 +81,24 @@ public class ChatService {
         return memberChatroomMappingList.stream()
                 .map(MemberChatroomMapping::getChatroom)
                 .toList();
+    }
+
+    // 메시지 저장
+    public Message saveMessage(Member member, Long chatroomId, String text) {
+        Chatroom chatroom = chatroomRepository.findById(chatroomId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 채팅방이 존재하지 않습니다"));
+
+        Message message = Message.builder()
+                .member(member)
+                .chatroom(chatroom)
+                .text(text)
+                .build();
+
+        return messageRepository.save(message);
+    }
+
+    // 특정 채팅방에서 작성된 모든 메시지 출력
+    public List<Message> getMessageList(Long chatroomId) {
+        return messageRepository.findAllByChatroomId(chatroomId);
     }
 }

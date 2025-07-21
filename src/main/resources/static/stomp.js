@@ -43,12 +43,6 @@ function sendMessage() {
   $("#message").val("")
 }
 
-function showMessage(chatMessage) {
-  $("#messages").append(
-      "<tr><td>" + chatMessage.sender + " : " + chatMessage.message
-      + "</td></tr>");
-}
-
 function createChatroom() {
   $.ajax({
     type: 'POST',
@@ -99,6 +93,7 @@ let subscription;
 function enterChatroom(chatroomId, newMember) {
     $("#chatroom-id").val(chatroomId);
     $("#messages").html("");
+    showMessages(chatroomId); // 과거에 채팅방에 있던 모든 메시지 출력
     $("#conversation").show();
     $("#send").prop("disabled", false);
     $("#leave").prop("disabled", false);
@@ -119,6 +114,30 @@ function enterChatroom(chatroomId, newMember) {
             {'message': "님이 방에 들어왔습니다."})
       })
     }
+}
+
+function showMessages(chatroomId) {
+  $.ajax({
+    type: 'GET',
+    dataType: 'json',
+    url: '/chats/' + chatroomId + '/messages',
+    success: function (data) {
+      console.log('data: ', data);
+      for(let i = 0; i < data.length; i++) {
+        showMessage(data[i]);
+      }
+    },
+    error: function (request, status, error) {
+      console.log('request: ', request);
+      console.log('error: ', error);
+    },
+  })
+}
+
+function showMessage(chatMessage) {
+  $("#messages").append(
+      "<tr><td>" + chatMessage.sender + " : " + chatMessage.message
+      + "</td></tr>");
 }
 
 function joinChatroom(chatroomId) {

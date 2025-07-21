@@ -1,8 +1,10 @@
 package chat.develop.controller;
 
+import chat.develop.dto.ChatMessage;
 import chat.develop.dto.ChatroomDto;
 import chat.develop.entity.Chatroom;
 import chat.develop.entity.Member;
+import chat.develop.entity.Message;
 import chat.develop.service.ChatService;
 import chat.develop.vo.CustomOAuth2User;
 import lombok.RequiredArgsConstructor;
@@ -51,6 +53,16 @@ public class ChatApiController {
 
         return chatroomList.stream()
                 .map(ChatroomDto::from)
+                .toList();
+    }
+
+    @GetMapping("/{chatroomId}/messages")
+    public List<ChatMessage> getMessageList(
+        @PathVariable("chatroomId") Long chatroomId
+    ) {
+        List<Message> messageList = chatService.getMessageList(chatroomId);
+        return messageList.stream()
+                .map(message -> new ChatMessage(message.getMember().getNickName(), message.getText()))
                 .toList();
     }
 }
