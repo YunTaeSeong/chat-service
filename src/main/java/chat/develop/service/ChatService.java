@@ -42,14 +42,19 @@ public class ChatService {
     }
 
     // 다른사람이 만든 채팅방에 참여
-    public Boolean joinChatroom(Member member, Long chatroomId) {
-        if(memberChatroomMappingRepository.existsByMemberIdAndChatroomId(member.getId(), chatroomId)) {
+    public Boolean joinChatroom(Member member, Long newChatroomId, Long currentChatroomId) {
+        // ex ) A -> B 로 채팅방 이동이 아닌, 바로 B 입장
+        if(currentChatroomId != null) {
+            updateLastCheckedAt(member, currentChatroomId);
+        }
+
+        if(memberChatroomMappingRepository.existsByMemberIdAndChatroomId(member.getId(), newChatroomId)) {
             log.info("이미 참여한 채팅방 입니다");
             return false;
         }
 
-        Chatroom chatroom = chatroomRepository.findById(chatroomId)
-                .orElseThrow(() -> new IllegalArgumentException("Chatroom not found with ID: " + chatroomId));
+        Chatroom chatroom = chatroomRepository.findById(newChatroomId)
+                .orElseThrow(() -> new IllegalArgumentException("Chatroom not found with ID: " + newChatroomId));
 
         MemberChatroomMapping memberChatroomMapping = MemberChatroomMapping.builder()
                 .member(member)
@@ -59,6 +64,15 @@ public class ChatService {
         memberChatroomMappingRepository.save(memberChatroomMapping);
 
         return true;
+    }
+
+    private void updateLastCheckedAt(Member member, Long currentChatroomId) {
+        MemberChatroomMapping memberChatroomMapping = memberChatroomMappingRepository.findByMemberIdAndChatroomId(member.getId(), currentChatroomId)
+                        .orElseThrow(() -> new IllegalArgumentException("참여한 대화방을 찾을 수 없습니다"));
+
+        memberChatroomMapping.updateLastCheckAt();
+
+        memberChatroomMappingRepository.save(memberChatroomMapping);
     }
 
     // 이미 참여했던 방에서 나오는 로직
@@ -79,7 +93,15 @@ public class ChatService {
         List<MemberChatroomMapping> memberChatroomMappingList = memberChatroomMappingRepository.findAllByMemberId(member.getId());
 
         return memberChatroomMappingList.stream()
-                .map(MemberChatroomMapping::getChatroom)
+                .map(memberChatroomMapping -> {
+                    Chatroom chatroom = memberChatroomMapping.getChatroom();
+                    // 새로운 메시지가 있는가? -> 채팅방 메시지 중에서 생성된 메시지가 어떤 특정 일자 이후에 생성되었는지
+                    // 어떤 특정 채팅방에 마지막으로 체크한 시간 보다 이후에 생성된 메시지면 새로운 메시지
+                    chatroom.setHasNewMessage(
+                            messageRepository.existsByChatroomIdAndCreatedAtAfter(chatroom.getId(), memberChatroomMapping.getLastCheckedAt())
+                    );
+                    return chatroom;
+                })
                 .toList();
     }
 
@@ -92,6 +114,7 @@ public class ChatService {
                 .member(member)
                 .chatroom(chatroom)
                 .text(text)
+                .createdAt(LocalDateTime.now())
                 .build();
 
         return messageRepository.save(message);

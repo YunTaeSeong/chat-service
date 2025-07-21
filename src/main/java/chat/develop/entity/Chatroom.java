@@ -26,6 +26,14 @@ public class Chatroom {
 
     private String title;
 
+    // 새로운 메시지를 가지고 있는지 아닌지
+    @Transient
+    private Boolean hasNewMessage;
+
+    public void setHasNewMessage(Boolean hasNewMessage) {
+        this.hasNewMessage = hasNewMessage;
+    }
+
     @OneToMany(mappedBy = "chatroom")
     private Set<MemberChatroomMapping> memberChatroomMappingSet;
 
