@@ -10,12 +10,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+@Getter
 @AllArgsConstructor
 public class CustomOAuth2User implements OAuth2User {
 
-    @Getter
-    private Member member;
-    private Map<String, Object> map;
+    public Member member;
+    public Map<String, Object> map;
 
     @Override
     public Map<String, Object> getAttributes() {

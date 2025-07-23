@@ -47,13 +47,29 @@ function disconnect() {
 
 function sendMessage() {
   let chatroomId = $("#chatroom-id").val();
+  let message = $("#message").val().trim();
+  if (!message) return; // 공백은 무시
+
   stompClient.publish({
     destination: "/pub/chats/" + chatroomId,
-    body: JSON.stringify(
-        {'message': $("#message").val()})
-  })
-  $("#message").val("")
+    body: JSON.stringify({ message: message })
+  });
+
+  $("#message").val("");
 }
+
+// Enter 키로 전송되도록 설정
+$(document).ready(function () {
+  $("#message").on("keyup", function (e) {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault(); // 줄바꿈 방지
+      sendMessage();
+    }
+  });
+
+  // 기존 send 버튼 클릭 이벤트도 연결되어 있다면 유지
+  $("#send").on("click", sendMessage);
+});
 
 function createChatroom() {
   $.ajax({

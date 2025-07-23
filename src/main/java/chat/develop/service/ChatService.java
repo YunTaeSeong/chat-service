@@ -1,5 +1,6 @@
 package chat.develop.service;
 
+import chat.develop.dto.ChatroomDto;
 import chat.develop.entity.Chatroom;
 import chat.develop.entity.Member;
 import chat.develop.entity.MemberChatroomMapping;
@@ -123,5 +124,13 @@ public class ChatService {
     // 특정 채팅방에서 작성된 모든 메시지 출력
     public List<Message> getMessageList(Long chatroomId) {
         return messageRepository.findAllByChatroomId(chatroomId);
+    }
+
+    @Transactional(readOnly = true)
+    public ChatroomDto getChatroom(Long chatroomId) {
+        Chatroom chatroom = chatroomRepository.findById(chatroomId)
+                .orElseThrow(() -> new IllegalArgumentException("채팅방 정보가 없습니다."));
+
+        return ChatroomDto.from(chatroom);
     }
 }

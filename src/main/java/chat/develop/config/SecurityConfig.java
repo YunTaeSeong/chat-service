@@ -32,7 +32,7 @@ public class SecurityConfig {
                 .securityMatcher("/consultants/**", "/login") // 특정 URL에만 인증/인가 적용되도록 제한
                 .authorizeHttpRequests(request -> request
                         .requestMatchers(HttpMethod.POST, "/consultants").permitAll()
-                        .anyRequest().authenticated())
+                        .anyRequest().hasRole("CONSULTANT"))
                 .formLogin(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable());
 
